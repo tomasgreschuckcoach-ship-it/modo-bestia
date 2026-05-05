@@ -37,7 +37,8 @@ const PUNTOS_POR_SESION = 25;
 
 // ── ESTADO GLOBAL ────────────────────────────
 
-let state = {
+// Estos son los valores que se usan si el usuario nunca configuró nada.
+const DEFAULT_STATE = {
   config: {
     startDate: null,
     totalWeeks: 6,
@@ -48,17 +49,57 @@ let state = {
   points: 0,
 };
 
+// Estado activo de la app (empieza con los valores por defecto)
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
 // ── PERSISTENCIA (localStorage) ─────────────
 
+/**
+ * GUARDAR: Convierte el estado a texto (JSON.stringify) y lo guarda.
+ * localStorage solo puede guardar texto, por eso necesitamos stringify.
+ */
 function saveState() {
-  localStorage.setItem('modoBestia_v2', JSON.stringify(state));
+  try {
+    const texto = JSON.stringify(state);
+    localStorage.setItem('modoBestia_v2', texto);
+  } catch (e) {
+    console.warn('No se pudo guardar el estado:', e);
+  }
 }
 
+/**
+ * CARGAR: Lee el texto guardado, lo convierte de vuelta a objeto (JSON.parse)
+ * y lo fusiona con los valores por defecto para que nunca falte ningún campo.
+ */
 function loadState() {
-  const raw = localStorage.getItem('modoBestia_v2');
-  if (raw) {
-    try { state = JSON.parse(raw); }
-    catch(e) { console.warn('Error cargando datos', e); }
+  try {
+    const texto = localStorage.getItem('modoBestia_v2');
+
+    // Si no hay nada guardado todavía, usamos los valores por defecto
+    if (!texto) return;
+
+    // Convertimos el texto de vuelta a un objeto JavaScript
+    const guardado = JSON.parse(texto);
+
+    // FUSIÓN: combinamos lo guardado con los defaults campo por campo.
+    // Esto evita que falten campos si la app se actualizó o los datos están incompletos.
+    state = {
+      config: {
+        startDate:   guardado.config?.startDate  ?? DEFAULT_STATE.config.startDate,
+        totalWeeks:  guardado.config?.totalWeeks ?? DEFAULT_STATE.config.totalWeeks,
+        rirByWeek:   Array.isArray(guardado.config?.rirByWeek) && guardado.config.rirByWeek.length > 0
+                       ? guardado.config.rirByWeek
+                       : [...DEFAULT_STATE.config.rirByWeek],
+      },
+      trainDays: Array.isArray(guardado.trainDays) ? guardado.trainDays : [],
+      sessions:  Array.isArray(guardado.sessions)  ? guardado.sessions  : [],
+      points:    typeof guardado.points === 'number' ? guardado.points  : 0,
+    };
+
+  } catch (e) {
+    // Si los datos guardados están corruptos, empezamos de cero
+    console.warn('Error al cargar datos guardados. Se usarán los valores por defecto.', e);
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
   }
 }
 
@@ -408,13 +449,33 @@ document.getElementById('modalClose').addEventListener('click', closeConfig);
 document.getElementById('modalBg').addEventListener('click', closeConfig);
 
 document.getElementById('btnSave').addEventListener('click', () => {
-  const startDate = document.getElementById('cfgStartDate').value;
+  const startDate  = document.getElementById('cfgStartDate').value;
   const totalWeeks = parseInt(document.getElementById('cfgWeeks').value) || 6;
-  const rirInputs = document.querySelectorAll('.rir-input');
-  const rirByWeek = Array.from(rirInputs).map(inp => parseInt(inp.value) || 0);
 
+  // CORRECCIÓN: leemos los inputs desde su contenedor específico (#rirInputs),
+  // no con querySelectorAll global que puede fallar si el modal está oculto.
+  const contenedor = document.getElementById('rirInputs');
+  const rirInputs  = contenedor.querySelectorAll('.rir-input');
+
+  // Si por algún motivo no hay inputs todavía, no guardamos y avisamos
+  if (rirInputs.length === 0) {
+    alert('Hubo un problema leyendo los valores de RIR. Intentá de nuevo.');
+    return;
+  }
+
+  const rirByWeek = Array.from(rirInputs).map(inp => {
+    const val = parseInt(inp.value);
+    // Si el valor no es un número válido, usamos 0 como fallback
+    return isNaN(val) ? 0 : val;
+  });
+
+  // Actualizamos el estado con los nuevos valores
   state.config = { startDate, totalWeeks, rirByWeek };
+
+  // Guardamos en localStorage
   saveState();
+
+  // Actualizamos la pantalla
   renderAll();
   closeConfig();
 });
@@ -422,12 +483,8 @@ document.getElementById('btnSave').addEventListener('click', () => {
 document.getElementById('btnReset').addEventListener('click', () => {
   if (confirm('⚠ ¿Estás seguro? Esto borrará todos tus datos: puntos, historial y configuración.')) {
     localStorage.removeItem('modoBestia_v2');
-    state = {
-      config: { startDate: null, totalWeeks: 6, rirByWeek: [4,3,3,2,1,0] },
-      trainDays: [],
-      sessions: [],
-      points: 0,
-    };
+    // Usamos una copia profunda del DEFAULT_STATE para evitar mutaciones accidentales
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     renderAll();
     closeConfig();
   }
