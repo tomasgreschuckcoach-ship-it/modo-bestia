@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Modo Bestia" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Modo Bestia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- PANTALLA DE CARGA -->
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <span class="splash-icon">⚡</span>
+      </div>
+      <h1 class="splash-title">MODO BESTIA</h1>
+      <p class="splash-sub">Sistema de Progreso</p>
+    </div>
+  </div>
+
+  <!-- APP PRINCIPAL -->
+  <div id="app" class="app hidden">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-brand">
+        <span class="header-icon">⚡</span>
+        <div>
+          <h1 class="header-title">MODO BESTIA</h1>
+          <p class="header-sub">Sistema de Progreso</p>
+        </div>
+      </div>
+      <button class="btn-config" id="btnConfig" title="Configuración">⚙</button>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="home">INICIO</button>
+      <button class="nav-btn" data-tab="training">ENTRENO</button>
+      <button class="nav-btn" data-tab="progress">PROGRESO</button>
+    </nav>
+
+    <!-- ===== PESTAÑA: INICIO ===== -->
+    <section id="tab-home" class="tab active">
+
+      <!-- TARJETA PRINCIPAL -->
+      <div class="card card-hero">
+        <div class="hero-date" id="heroDate">--</div>
+        <div class="hero-info">
+          <div class="hero-stat">
+            <span class="hero-label">SEMANA</span>
+            <span class="hero-value" id="heroWeek">--</span>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-label">RIR HOY</span>
+            <span class="hero-value accent" id="heroRIR">--</span>
+          </div>
+        </div>
+        <div class="hero-msg" id="heroMsg">Configurá tu ciclo para comenzar</div>
+        <div class="hero-progress-bar">
+          <div class="hero-progress-fill" id="heroProgressFill" style="width:0%"></div>
+        </div>
+        <div class="hero-progress-label" id="heroProgressLabel">Semana 0 de 0</div>
+      </div>
+
+      <!-- NIVEL Y PUNTOS -->
+      <div class="card card-level">
+        <div class="level-left">
+          <div class="level-badge" id="levelBadge">🥉</div>
+          <div>
+            <div class="level-name" id="levelName">Bronce I</div>
+            <div class="level-pts" id="levelPts">0 puntos</div>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-next" id="levelNext">Próximo: 100 pts</div>
+          <div class="level-bar-wrap">
+            <div class="level-bar-fill" id="levelBarFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DÍAS DE ESTA SEMANA -->
+      <div class="card">
+        <h3 class="card-title">ESTA SEMANA</h3>
+        <div class="week-days" id="weekDaysHome"></div>
+      </div>
+
+    </section>
+
+    <!-- ===== PESTAÑA: ENTRENO ===== -->
+    <section id="tab-training" class="tab">
+
+      <div class="card">
+        <h3 class="card-title">MIS DÍAS DE ENTRENAMIENTO</h3>
+        <p class="card-hint">Seleccioná los días que entrenás</p>
+        <div class="day-selector" id="daySelector"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">REGISTRAR HOY</h3>
+        <div class="register-info" id="registerInfo">
+          <div class="reg-row"><span>📅 Fecha</span><span id="regDate">--</span></div>
+          <div class="reg-row"><span>📊 Semana</span><span id="regWeek">--</span></div>
+          <div class="reg-row"><span>🎯 RIR</span><span id="regRIR">--</span></div>
+        </div>
+        <button class="btn-complete" id="btnComplete">✔ MARCAR COMO COMPLETADO</button>
+        <div class="completed-msg hidden" id="completedMsg">✅ ¡Entrenamiento registrado! +25 puntos</div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">HISTORIAL RECIENTE</h3>
+        <div id="historyList" class="history-list"></div>
+      </div>
+
+    </section>
+
+    <!-- ===== PESTAÑA: PROGRESO ===== -->
+    <section id="tab-progress" class="tab">
+
+      <div class="card card-stats">
+        <div class="stat-box">
+          <div class="stat-num" id="statPoints">0</div>
+          <div class="stat-label">PUNTOS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statSessions">0</div>
+          <div class="stat-label">SESIONES</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statStreak">0</div>
+          <div class="stat-label">RACHA</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">SISTEMA DE NIVELES</h3>
+        <div class="levels-list" id="levelsList"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">INFO DEL CICLO</h3>
+        <div id="cycleInfo" class="cycle-info"></div>
+      </div>
+
+      <div class="byline">by Tomás Greschuck</div>
+
+    </section>
+
+  </div>
+
+  <!-- ===== MODAL DE CONFIGURACIÓN ===== -->
+  <div id="modalConfig" class="modal hidden">
+    <div class="modal-bg" id="modalBg"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">CONFIGURACIÓN</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label class="form-label">📅 Fecha de inicio del ciclo</label>
+          <input type="date" id="cfgStartDate" class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🔄 Cantidad de semanas del ciclo</label>
+          <input type="number" id="cfgWeeks" class="form-input" min="1" max="20" value="6" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">🎯 RIR por semana</label>
+          <p class="form-hint">RIR = Repeticiones en Reserva (cuántas podrías haber hecho más)</p>
+          <div id="rirInputs" class="rir-inputs"></div>
+        </div>
+
+        <button class="btn-save" id="btnSave">💾 GUARDAR CONFIGURACIÓN</button>
+        <button class="btn-reset" id="btnReset">🗑 RESETEAR TODO</button>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
