@@ -25,7 +25,13 @@
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 16px; }
+html {
+  font-size: 16px;
+  /* Empuja todo el contenido por debajo de la barra de estado del SO */
+  padding-top: env(safe-area-inset-top, 0px);
+  /* Mismo color de fondo para que el relleno no se vea como una franja rara */
+  background: #0a0a0a;
+}
 
 body {
   background: var(--black);
@@ -44,7 +50,14 @@ body {
    ============================================ */
 .splash {
   position: fixed;
-  inset: 0;
+  /* inset: 0 pondría el splash encima de la safe area también,
+     así que sumamos el espacio del sistema arriba */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Padding para que el contenido del splash no quede bajo la barra de estado */
+  padding-top: env(safe-area-inset-top, 0px);
   background: var(--black);
   display: flex;
   align-items: center;
@@ -119,6 +132,8 @@ body {
   align-items: center;
   justify-content: space-between;
   position: sticky;
+  /* Cuando html tiene padding-top por safe-area, sticky top: 0 ya se posiciona
+     correctamente debajo de ese relleno. No necesitamos sumar el inset aquí. */
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 20px rgba(230,25,25,0.2);
@@ -685,7 +700,12 @@ body {
    ============================================ */
 .modal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* El modal cubre toda la pantalla incluyendo la safe area,
+     para que el fondo oscuro quede detrás de la barra del sistema */
   z-index: 500;
   display: flex;
   align-items: flex-end;
@@ -750,7 +770,14 @@ body {
 
 .modal-close:hover { border-color: var(--red); color: var(--red); }
 
-.modal-body { padding: 1.2rem 1.3rem; display: flex; flex-direction: column; gap: 1.2rem; }
+.modal-body {
+  padding: 1.2rem 1.3rem;
+  /* Espacio extra abajo para no quedar tapado por la barra de inicio del iPhone */
+  padding-bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
 
 /* ── FORM ── */
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
